@@ -1,6 +1,6 @@
 import deepxde as dde
 import torch
-# dde.backend.set_default_backend("tensorflow")
+# dde.backend.set_default_backend("pytorch")
 
 import matplotlib.pyplot as plt
 
@@ -37,6 +37,21 @@ def diff_eq(t, x, p=params):
 def gen_truedata(func, t, ini, params):
     sol = integrate.solve_ivp(func, (min(t), max(t)), ini, t_eval=t, args=(params,))
     return sol.y.T
+
+# Get PRC with DeepXDE
+def ode_system(x, y):
+    t  = x
+    Z0 = y
+
+    Z0dot = torch.stack([torch.autograd.grad(Z0[:, i], t, torch.ones_like(Z0[:, i]), create_graph=True)[0] for i in range(len(diff_eqs))], axis=1).squeeze()
+
+    # elementwise dot product
+    constraint = torch.sum(Z0 * F_xlc, dim=1) - 1
+
+    # Elementwise vector*matrix product
+    diff_eq = Z0dot + torch.bmm(J_T, Z0.unsqueeze(-1)).squeeze(-1)
+
+    return [constraint, diff_eq]
 
 
 diff_eqs = [dv_dt, dw_dt]
@@ -78,42 +93,15 @@ for i,v_ in enumerate(x[:,0]):
 P0 = (pks[-1] - pks[-2])*dt
 f0 = 1/P0
 
-
 # limit cycle
 x_lc = x[pks[-2]:pks[-1]]
 t = t_sim[pks[-2]:pks[-1]] - t_sim[pks[-2]]
-
-# plt.figure(tight_layout=True)
-# for i, (x_, var) in enumerate(zip(x_lc.T,eq_names)):
-#     plt.subplot(len(diff_eqs),1,i+1)
-#     plt.plot(t,x_)
-#     plt.xlabel('t [ms]')
-#     plt.ylabel(var)
-# plt.show()
-
 
 # Time-derive the limit cycle
 F_xlc_ = anp.array(diff_eq(t,x_lc)).T
 
 # get the Jacobian of the limit cycle
 J_ = anp.stack([elementwise_grad(diff_eqs[i])(x_lc) for i in range(len(diff_eqs))],axis=1)
-
-
-# Get PRC with DeepXDE
-def ode_system(x, y):
-    t  = x
-    Z0 = y
-
-    Z0dot = torch.stack([torch.autograd.grad(Z0[:, i], t, torch.ones_like(Z0[:, i]), create_graph=True)[0] for i in range(len(diff_eqs))], axis=1).squeeze()
-
-    # elementwise dot product
-    constraint = torch.sum(Z0 * F_xlc, dim=1) - 1
-
-    # Elementwise vector*matrix product
-    diff_eq = Z0dot + torch.bmm(J_T, Z0.unsqueeze(-1)).squeeze(-1)
-
-    return [constraint, diff_eq]
-
 
 geom = dde.geometry.TimeDomain(t[0], t[-1])
 
@@ -168,7 +156,7 @@ for i,(z0,var) in enumerate(zip(Z0.T,eq_names)):
 plt.show()
 
 # evaluate results
-plt.plot(t[1:]/P0,anp.diff(Z0,axis=0)/dt,linewidth=5,c='y',label='dZ0/dt')
+plt.plot(t[1:]/P0, anp.diff(Z0,axis=0)/dt,linewidth=5,c='y',label='dZ0/dt')
 plt.plot(t/P0,-(J_.swapaxes(1,2) @ Z0[..., None])[..., 0],linestyle='--',c='k',label='-J.T*Z0')
 plt.xlabel('phi')
 plt.legend()
@@ -176,11 +164,8 @@ plt.show()
 
 F_xlc_ = torch.tensor(F_xlc_, dtype=torch.float32)
 Z0 = torch.tensor(Z0, dtype=torch.float32)
-
-# Elementwise dot product
 dot_product_results = torch.sum(Z0 * F_xlc_, dim=1)
 
-# Now you can plot using matplotlib
 plt.plot(t / P0, dot_product_results.detach())
 plt.xlabel('phi')
 plt.ylabel('Z0 * W0')
