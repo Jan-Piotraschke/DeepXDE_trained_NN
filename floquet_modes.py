@@ -153,14 +153,14 @@ for i,(z0,var) in enumerate(zip(Z0.T,eq_names)):
     plt.plot(t/P0,z0)
     plt.xlabel('phi')
     plt.ylabel('dphi/d%s'%var)
-plt.show()
+# plt.show()
 
 # evaluate results
 plt.plot(t[1:]/P0, anp.diff(Z0,axis=0)/dt,linewidth=5,c='y',label='dZ0/dt')
 plt.plot(t/P0,-(J_.swapaxes(1,2) @ Z0[..., None])[..., 0],linestyle='--',c='k',label='-J.T*Z0')
 plt.xlabel('phi')
 plt.legend()
-plt.show()
+# plt.show()
 
 F_xlc_ = torch.tensor(F_xlc_, dtype=torch.float32)
 Z0 = torch.tensor(Z0, dtype=torch.float32)
@@ -169,4 +169,24 @@ dot_product_results = torch.sum(Z0 * F_xlc_, dim=1)
 plt.plot(t / P0, dot_product_results.detach())
 plt.xlabel('phi')
 plt.ylabel('Z0 * W0')
-plt.show()
+# plt.show()
+
+# Convert to torch script
+# `model` is a DeepXDE model, and `net` is the underlying PyTorch model
+net = model.net
+
+# Put the underlying PyTorch model in evaluation mode
+net.eval()
+
+# Move the model to the CPU
+net.to('cpu')
+
+# Dummy input tensor
+dummy_input = torch.tensor(t.reshape(-1, 1), dtype=torch.float32)
+breakpoint()
+# Trace the model with the dummy input
+traced_script_module = torch.jit.trace(net, dummy_input)
+
+# Save the traced model
+traced_script_module.save("traced_model.pt")
+
