@@ -31,10 +31,10 @@ else ifeq ($(OS), Linux)
 endif
 
 .PHONY: all
-all: build
+all: build_cpp build_rust
 
-.PHONY: build
-build:
+.PHONY: build_cpp
+build_cpp:
 	@echo "Building for platform: $(PLATFORM)"; \
 	$(CMAKE_CMD) -S $(PROJECT_DIR) \
 			-B $(PROJECT_DIR)/$(BUILD_DIR) \
@@ -51,3 +51,21 @@ else ifeq ($(OS), Linux)
 	$(BUILD_CMD) -C $(PROJECT_DIR)/$(BUILD_DIR) -j $(shell nproc)
 endif
 
+
+.PHONY: build_rust
+build_rust:
+	@echo "Building Rust dependencies..."
+	cargo build --release
+
+# Run the Rust executable
+.PHONY: run
+run:
+	cargo run --release $(PROJECT_DIR)/model/traced_model.pt
+
+.PHONY: doc
+doc:
+	cargo doc --no-deps --open
+
+.PHONY: wasm
+wasm:
+	wasm-pack build

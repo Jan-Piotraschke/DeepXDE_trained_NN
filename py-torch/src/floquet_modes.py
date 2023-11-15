@@ -183,10 +183,10 @@ net.to('cpu')
 
 # Dummy input tensor
 dummy_input = torch.tensor(t.reshape(-1, 1), dtype=torch.float32)
-breakpoint()
+
 # Trace the model with the dummy input
 traced_script_module = torch.jit.trace(net, dummy_input)
 
 # Save the traced model
-traced_script_module.save("traced_model.pt")
+traced_script_module.save("model/traced_model.pt")
 
