@@ -8,10 +8,6 @@ What is this about? I want to recite Faust, Goethe for the answer:
 
 This tension illustrates that a complete description of the tissue (our "Erdenkreis" as per Lucy) may not be possible with our current methods, and therefore, we may resort to a hyperspace approach of the neural network, since its understanding of the system could differ from ours, which, however, could prove beneficial to us.
 
-## Training and saving Neural Networks using DeepXDE
-
-Test your compiled C++ file by running ```./build/example-app traced_model.pt```
-
 ## Briefer about PINNs
 
 [PINNs](https://maziarraissi.github.io/PINNs/) can be designed to solve two classes of problems:
