@@ -17,8 +17,21 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{Write, BufWriter};
 use plotters::prelude::*;
+// use std::path::PathBuf;
+use autocxx::prelude::*;
+// use ffi::ToCppString;
+
+include_cpp! {
+    #include "input.h"
+    safety!(unsafe_ffi)
+    generate!("do_math")
+}
+
 
 fn main() -> Result<(), Box<dyn Error>> {
+    // First: Print the solution of a C++ function
+    println!("{}", ffi::do_math(12, 13));
+
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 2 {
         eprintln!("usage: example-app <path-to-exported-script-module>");
