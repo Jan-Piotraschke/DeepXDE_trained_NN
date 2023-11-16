@@ -4,7 +4,9 @@ version = "0.1.0"
 authors = ["Jan-Piotraschke <piotraschke.janniklas@gmail.com>"]
 edition = "2021"
 
-# [lib]
+[lib]
+name = "new_king_lib"
+path = "src/lib.rs"
 # crate-type = ["cdylib", "rlib"]
 
 [dependencies]

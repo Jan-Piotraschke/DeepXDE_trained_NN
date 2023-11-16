@@ -1,5 +1,9 @@
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-project(custom_ops)
+cmake_minimum_required(VERSION 3.22)
+project(
+    custom_ops
+    VERSION 0.0.1
+    LANGUAGES CXX
+)
 
 find_package(Torch REQUIRED)
 

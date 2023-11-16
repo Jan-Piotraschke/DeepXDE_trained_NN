@@ -60,7 +60,7 @@ build_rust:
 # Run the Rust executable
 .PHONY: run
 run:
-	cargo run --release $(PROJECT_DIR)/model/traced_model.pt
+	cargo run --release model/traced_model.pt
 
 .PHONY: doc
 doc:
