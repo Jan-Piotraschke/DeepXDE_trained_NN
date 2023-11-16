@@ -1,4 +1,4 @@
-// //! # Build Script for Rust Project Using `autocxx`
+// //! # Build C++ Scripts for Rust Project Using `autocxx`
 // //!
 // //! This script is responsible for setting up the build process for a Rust project
 // //! which uses `autocxx` for C++ interoperability.
@@ -15,14 +15,14 @@ fn main() -> miette::Result<()>  {
     let include_path = std::path::PathBuf::from("src/cpp");
 
     // Initializes the `autocxx` build process
-    let mut builder = autocxx_build::Builder::new("src/main.rs", &[&include_path])
+    let mut builder = autocxx_build::Builder::new("src/lib.rs", &[&include_path])
         .build()?;
 
     // Compiles the generated bindings with C++17 standards
     builder.flag_if_supported("-std=c++17").compile("new_king");
 
     // Instructs Cargo to re-run this script if `main.rs` changes
-    println!("cargo:rerun-if-changed=src/main.rs");
+    println!("cargo:rerun-if-changed=src/lib.rs");
 
     Ok(())
 }
